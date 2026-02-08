@@ -15,13 +15,41 @@ struct State {
     short size_x;
     short size_y;
     Position player_pos;
-    short* blocks;
+    short block_count;
     bool win;
     bool lost;
+};
+enum direction {
+    RIGHT,
+    LEFT,
+    UP,
+    DOWN
+};
+enum block{
+    EMPTYBLOCK,
+    PLAYER,
+    RED,
+    BLUE,
+    GREEN,
+    YELLOW
+};
+enum tile {
+    EMPTYTILE,
+    PLAYERGOAL,
+    REDGOAL,
+    BLUEGOAL,
+    GREENGOAL,
+    YELLOWGOAL,
+    TILE,
+    XTILE,
+    PUSHRIGHT,
+    PUSHLEFT,
+    PUSHUP,
+    PUSHDOWN
 };
 
 State empty_state(short x, short y);
 
 State state_from_string(std::string s, short x, short y);
 
-std::string string_from_state(State s);
+std::string string_from_state(State *s);

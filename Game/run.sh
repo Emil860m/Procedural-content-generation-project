@@ -1,4 +1,8 @@
+echo "Compiling state"
 g++ -c state.cpp
+echo "Compiling game"
+g++ -c game.cpp
+echo "Compiling main"
 g++ -c main.cpp 
-g++ state.o main.o -o a.out
+g++ state.o game.o main.o -o a.out
 ./a.out

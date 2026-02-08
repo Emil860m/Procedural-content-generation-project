@@ -18,7 +18,7 @@ struct State {
     short size_x;
     short size_y;
     Position player_pos;
-    short* blocks;
+    short block_count;
     bool win;
     bool lost;
 };
@@ -37,12 +37,14 @@ enum tile {
     BLUEGOAL,
     GREENGOAL,
     YELLOWGOAL,
+    TILE,
     XTILE,
     PUSHRIGHT,
     PUSHLEFT,
     PUSHUP,
     PUSHDOWN
 };
+
 State empty_state(short x, short y) {
     State state;
     state.size_x = x;
@@ -74,13 +76,15 @@ State state_from_string(std::string s, short x, short y) {
 
     state.cells = new Cell*[x];
     assert(s.length() == x*y*2);
+    short blocks[4];
 
     short player_count = 0;
+    short block_count = 0;
     for (int i = 0; i < x; ++i) {
         Cell* c = new Cell[y];
-        for (int j = 0; j < y; ++j) {
-            char c1 = s[(y*i*2)+(j*2)];
-            char c2 = s[(y*i*2)+(j*2)+1];
+        for (int j = 0; j < y; j++) {
+            char c1 = s[(((y*i)+j)*2)];
+            char c2 = s[(((y*i)+j)*2)+1];
             short s1 = c1 - '0';
             short s2 = c2 - '0';
             c[j].tile = s1;
@@ -92,21 +96,31 @@ State state_from_string(std::string s, short x, short y) {
                 state.player_pos.x = i;
                 state.player_pos.y = j;
             }
+            else if (s2 > PLAYER && s2 <= YELLOW) {
+                for(int k = 0; k < block_count; k++) {
+                    assert(blocks[k] != s2);
+                }
+                blocks[block_count] = s2;
+                block_count ++;
+            }
         }
         state.cells[i] = c;
     }
+    state.block_count = block_count;
     assert(player_count == 1);
     return state;
 }
 
 
-string string_from_state(State s) {
-    char str[s.size_x*s.size_y*2]; 
+string string_from_state(State *s) {
+    if (s->win) return "WIN";
+    else if (s->lost) return "LOST";
+    string str = "";
     short count = 0;
-    for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            str[count] = (char)s.cells[i][j].tile + '0';
-            str[count+1] = (char)s.cells[i][j].block + '0';
+    for (int i = 0; i < s->size_x; ++i) {
+        for (int j = 0; j < s->size_y; ++j) {
+            str += (char)s->cells[i][j].tile + '0';
+            str += (char)s->cells[i][j].block + '0';
             count+=2;
         }
     }
