@@ -91,3 +91,8 @@ bool is_move_legal(State *current_state, direction dir, Position block_pos) {
     move(current_state, dir, block_pos);
     return true;
 }
+
+
+void attempt_move(State *current_state, direction dir) {
+    is_move_legal(current_state, dir, current_state->player_pos);
+}
