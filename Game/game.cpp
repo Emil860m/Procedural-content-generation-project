@@ -48,7 +48,6 @@ void move(State *current_state, direction dir, Position block_pos) {
             current_state->cells[new_pos.x][new_pos.y].tile = TILE;
         }
         else {
-            cout << "lose";
             current_state->lost = true;
         }
     }

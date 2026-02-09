@@ -53,3 +53,5 @@ State empty_state(short x, short y);
 State state_from_string(std::string s, short x, short y);
 
 std::string string_from_state(State *s);
+
+void deep_copy(State *dst, const State *src);

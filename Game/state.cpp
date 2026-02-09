@@ -126,3 +126,23 @@ string string_from_state(State *s) {
     }
     return str;
 }
+
+
+void deep_copy(State *dst, const State *src) {
+    dst->block_count = src->block_count;
+    dst->size_x = src->size_x;
+    dst->size_y = src->size_y;
+    dst->win = src->win;
+    dst->player_pos = src->player_pos;
+    dst->lost = src->lost;
+    dst->cells = new Cell*[dst->size_x];
+    for(int i = 0; i < dst->size_x; i++) {
+        Cell* c = new Cell[dst->size_y];
+        for (int j = 0; j < dst->size_y; j++)
+        {
+            c[j] = src->cells[i][j];
+        }
+        dst->cells[i] = c;
+        
+    }
+}
