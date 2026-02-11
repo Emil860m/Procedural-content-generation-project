@@ -6,10 +6,12 @@
 using namespace std;
 struct State_group
 {
-    State* child_states;
-    State* connected_states;
+    std::unordered_set<std::string>* child_states;
+    std::unordered_set<State_group>* connected_states;
     bool can_win;
     float eval;
+    int size;
+    int connections;
 };
 
 struct directions{
@@ -22,14 +24,13 @@ struct directions{
 
 
 
-void solve(State *state) {
+void solve(State *state, std::unordered_map<string, directions>* game_states) {
     short x = state->size_x;
     short y = state->size_y;
     string sstr = string_from_state(state);
     std::unordered_set<std::string> seen_states{sstr};
-    std::unordered_map<string, directions> game_states = {};
-    directions d;
-    game_states.insert({sstr, d}); 
+    //std::unordered_map<string, directions> game_states = {};
+    
     stack<string> st;
     st.push(sstr);
     string current;
@@ -38,7 +39,7 @@ void solve(State *state) {
         current = st.top();
         st.pop();
         directions dirs;
-        game_states.insert({current, dirs});
+        game_states[0].insert({current, dirs});
         for (int i = 0; i < 4; i++)
         {
             State new_state = state_from_string(current, x, y);
@@ -52,16 +53,16 @@ void solve(State *state) {
             switch (i)
             {
             case 0:
-                game_states.find(current)->second.right = str;
+                game_states[0].find(current)->second.right = str;
                 break;
             case 1:
-                game_states.find(current)->second.left = str;
+                game_states[0].find(current)->second.left = str;
                 break;
             case 2:
-                game_states.find(current)->second.up = str;
+                game_states[0].find(current)->second.up = str;
                 break;
             case 3:
-                game_states.find(current)->second.down = str;
+                game_states[0].find(current)->second.down = str;
                 break;
             default:
                 break;
@@ -69,10 +70,26 @@ void solve(State *state) {
         }
         
     }
-    cout << seen_states.size() << "\n" << game_states.size() << "\n";
-    if (auto search = game_states.find("00000060000060606000006060600010616060600060600000"); search != game_states.end())
-        std::cout << "Found " << search->first << ' ' << search->second.up << '\n';
-    else
-        std::cout << "Not found\n";
+}
+
+
+void group_gamestates(std::unordered_map<string, directions>* game_states) {
+    std::unordered_map<string, State_group> groups = {};
+    for (const auto& [key, value] : game_states[0]) {
+        if (auto search = groups.find(key); search != groups.end()) {
+            State_group sg = search->second;
+        } else {
+            State_group sg;
+            std::unordered_set<std::string> child_list;
+            child_list.insert(key);
+            sg.size = 1;
+            sg.child_states = &child_list;
+            groups.insert({key, sg});
+            for(int i = 0; i < 4; i++) {
+                //TODO
+            }
+        }
+    }
     
+    cout << groups.size();
 }
