@@ -1,4 +1,5 @@
 #include <string>
+using namespace std;
 struct Position 
 {
     short x;
@@ -55,3 +56,5 @@ State state_from_string(std::string s, short x, short y);
 std::string string_from_state(State *s);
 
 void deep_copy(State *dst, const State *src);
+
+string remove_player_from_statestring(string s);

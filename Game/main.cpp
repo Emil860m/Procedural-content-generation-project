@@ -12,6 +12,6 @@ int main() {
     
     solve(ptr, &game_states);
     cout << game_states.size();
-    group_gamestates(&game_states);
+    //group_gamestates(&game_states);
     return 0;
 }
