@@ -7,11 +7,25 @@ int main() {
     string str = "00000020000060606000006064600010656261600050406000";
     State state = state_from_string(str, 5, 5);
     State *ptr = &state;
-    cout << str + "\n";
+    //cout << str + "\n";
     std::unordered_map<string, directions> game_states = {};
+    std::unordered_map<string, State_group> groups = {};
+    solve(ptr, &game_states, &groups);
+
+    //if (auto search = groups.find("00000020000060606000006064600010656260600050406000"); search != groups.end()) {
+     //   cout << search->second[0].child_states.size();
+        //cout << search->second[0].child_states.size() <<  "\n" << search->second[0].can_win << "\n" << search->second[0].connections<< "\n";
+    //}
     
-    solve(ptr, &game_states);
-    cout << game_states.size();
+    for (const auto& n : groups) {
+        cout << n.first << " " << n.second.size << "\n";
+    }
+    for (const std::pair<const string, directions>& n : game_states) {
+        //cout << n.first << " " << n.second.down << "\n";
+    }
+    //cout << game_states.size();
+    cout << &groups.begin()->second << endl;
+
     //group_gamestates(&game_states);
     return 0;
 }

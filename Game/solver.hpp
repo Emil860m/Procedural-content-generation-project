@@ -18,6 +18,6 @@ struct directions{
     string down;
 };
 
-void solve(State *state, std::unordered_map<string, directions>* game_states);
+void solve(State *state, std::unordered_map<string, directions>* game_states, std::unordered_map<string, State_group>* groups);
 
 void group_gamestates(std::unordered_map<string, directions>* game_states);

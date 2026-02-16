@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <vector>
 using namespace std;
 struct Position 
 {
@@ -14,14 +15,63 @@ struct Cell
     Position pos;
 };
 struct State {
-    Cell** cells;
+    std::vector<std::vector<Cell>> cells;
+    //Cell** cells;
     short size_x;
     short size_y;
     Position player_pos;
     short block_count;
     bool win;
     bool lost;
+
+    ~State() {
+        if (cells) {
+            for (int i = 0; i < size_x; i++)
+                delete[] cells[i];
+            delete[] cells;
+        }
+    }
+
+    State(const State& other) {
+        size_x = other.size_x;
+        size_y = other.size_y;
+        player_pos = other.player_pos;
+        block_count = other.block_count;
+        win = other.win;
+        lost = other.lost;
+
+        cells = new Cell*[size_x];
+        for (int i = 0; i < size_x; i++) {
+            cells[i] = new Cell[size_y];
+            for (int j = 0; j < size_y; j++)
+                cells[i][j] = other.cells[i][j];
+        }
+    }
+
+    State& operator=(const State& other) {
+        if (this == &other) return *this;
+
+        this->~State();
+
+        size_x = other.size_x;
+        size_y = other.size_y;
+        player_pos = other.player_pos;
+        block_count = other.block_count;
+        win = other.win;
+        lost = other.lost;
+
+        cells = new Cell*[size_x];
+        for (int i = 0; i < size_x; i++) {
+            cells[i] = new Cell[size_y];
+            for (int j = 0; j < size_y; j++)
+                cells[i][j] = other.cells[i][j];
+        }
+
+        return *this;
+    }
+    State() : cells(nullptr), size_x(0), size_y(0), block_count(0), win(false), lost(false) {}
 };
+
 enum block{
     EMPTYBLOCK,
     PLAYER,
@@ -119,8 +169,9 @@ string string_from_state(State *s) {
     short count = 0;
     for (int i = 0; i < s->size_x; ++i) {
         for (int j = 0; j < s->size_y; ++j) {
-            str += (char)s->cells[i][j].tile + '0';
-            str += (char)s->cells[i][j].block + '0';
+            str += char(s->cells[i][j].tile + '0');
+            str += char(s->cells[i][j].block + '0');
+
             count+=2;
         }
     }
