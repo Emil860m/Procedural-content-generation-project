@@ -24,52 +24,6 @@ struct State {
     bool win;
     bool lost;
 
-    ~State() {
-        if (cells) {
-            for (int i = 0; i < size_x; i++)
-                delete[] cells[i];
-            delete[] cells;
-        }
-    }
-
-    State(const State& other) {
-        size_x = other.size_x;
-        size_y = other.size_y;
-        player_pos = other.player_pos;
-        block_count = other.block_count;
-        win = other.win;
-        lost = other.lost;
-
-        cells = new Cell*[size_x];
-        for (int i = 0; i < size_x; i++) {
-            cells[i] = new Cell[size_y];
-            for (int j = 0; j < size_y; j++)
-                cells[i][j] = other.cells[i][j];
-        }
-    }
-
-    State& operator=(const State& other) {
-        if (this == &other) return *this;
-
-        this->~State();
-
-        size_x = other.size_x;
-        size_y = other.size_y;
-        player_pos = other.player_pos;
-        block_count = other.block_count;
-        win = other.win;
-        lost = other.lost;
-
-        cells = new Cell*[size_x];
-        for (int i = 0; i < size_x; i++) {
-            cells[i] = new Cell[size_y];
-            for (int j = 0; j < size_y; j++)
-                cells[i][j] = other.cells[i][j];
-        }
-
-        return *this;
-    }
-    State() : cells(nullptr), size_x(0), size_y(0), block_count(0), win(false), lost(false) {}
 };
 
 enum block{
@@ -102,16 +56,17 @@ State empty_state(short x, short y) {
     state.win = false;
     state.lost = false;
 
-    state.cells = new Cell*[x];
 
     for (int i = 0; i < x; ++i) {
-        Cell* c = new Cell[y];
+        vector<Cell> inner;
         for (int j = 0; j < y; ++j)
         {
-            c[j].pos.x = i;
-            c[j].pos.y = j;
+            Cell c;
+            c.pos.x = i;
+            c.pos.y = j;
+            inner.push_back(c);
         }
-        state.cells[i] = c;
+        state.cells.push_back(inner);
     }
     return state;
 }
@@ -123,24 +78,23 @@ State state_from_string(std::string s, short x, short y) {
     state.size_y = y;
     state.win = false;
     state.lost = false;
-
-    state.cells = new Cell*[x];
     assert(s.length() == x*y*2);
     short blocks[4];
 
     short player_count = 0;
     short block_count = 0;
     for (int i = 0; i < x; ++i) {
-        Cell* c = new Cell[y];
+        vector<Cell> inner;
         for (int j = 0; j < y; j++) {
+            Cell c;
             char c1 = s[(((y*i)+j)*2)];
             char c2 = s[(((y*i)+j)*2)+1];
             short s1 = c1 - '0';
             short s2 = c2 - '0';
-            c[j].tile = s1;
-            c[j].block = s2;
-            c[j].pos.x = i;
-            c[j].pos.y = j;
+            c.tile = s1;
+            c.block = s2;
+            c.pos.x = i;
+            c.pos.y = j;
             if (s2 == PLAYER) {
                 player_count++;
                 state.player_pos.x = i;
@@ -153,8 +107,9 @@ State state_from_string(std::string s, short x, short y) {
                 blocks[block_count] = s2;
                 block_count ++;
             }
+            inner.push_back(c);
         }
-        state.cells[i] = c;
+        state.cells.push_back(inner);
     }
     state.block_count = block_count;
     assert(player_count == 1);
@@ -178,7 +133,7 @@ string string_from_state(State *s) {
     return str;
 }
 
-
+/*
 void deep_copy(State *dst, const State *src) {
     dst->block_count = src->block_count;
     dst->size_x = src->size_x;
@@ -197,7 +152,7 @@ void deep_copy(State *dst, const State *src) {
         
     }
 }
-
+*/
 string remove_player_from_statestring(string s) {
     for (int i = 0; i < s.size(); i+=2) {
         if (s[i + 1] == '1') {

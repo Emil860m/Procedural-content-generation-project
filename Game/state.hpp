@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 using namespace std;
 struct Position 
 {
@@ -12,7 +13,8 @@ struct Cell
     Position pos;
 };
 struct State {
-    Cell** cells;
+    std::vector<std::vector<Cell>> cells;
+    //Cell** cells;
     short size_x;
     short size_y;
     Position player_pos;
@@ -55,6 +57,6 @@ State state_from_string(std::string s, short x, short y);
 
 std::string string_from_state(State *s);
 
-void deep_copy(State *dst, const State *src);
+//void deep_copy(State *dst, const State *src);
 
 string remove_player_from_statestring(string s);

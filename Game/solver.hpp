@@ -4,12 +4,12 @@ using namespace std;
 
 struct State_group
 {
-    std::unordered_set<std::string>* child_states;
-    std::unordered_set<State_group>* connected_states;
-    bool can_win;
-    float eval;
-    int size;
-    int connections;
+    std::vector<std::string> child_states;
+    std::vector<std::string> connected_states;
+    bool can_win = false;
+    float eval = 0.0f;
+    int size = 0;
+    int connections = 0;
 };
 struct directions{
     string right;

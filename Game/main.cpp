@@ -11,6 +11,7 @@ int main() {
     std::unordered_map<string, directions> game_states = {};
     std::unordered_map<string, State_group> groups = {};
     solve(ptr, &game_states, &groups);
+    
 
     //if (auto search = groups.find("00000020000060606000006064600010656260600050406000"); search != groups.end()) {
      //   cout << search->second[0].child_states.size();

@@ -19,6 +19,9 @@ void move(State *current_state, direction dir, Position block_pos) {
     } else if(dir == DOWN) {
         new_pos.y += 1;
     }
+    if (current_state->cells[new_pos.x][new_pos.y].block != 0) {
+        move(current_state, dir, new_pos);
+    }
 
     // THE MOVE ITSELF
     current_state->cells[new_pos.x][new_pos.y].block = current_state->cells[block_pos.x][block_pos.y].block;
@@ -81,17 +84,13 @@ bool is_move_legal(State *current_state, direction dir, Position block_pos) {
         return false;
     }
     else if (current_state->cells[new_pos.x][new_pos.y].block != 0) {
-        if (is_move_legal(current_state, dir, new_pos)) {
-            move(current_state, dir, block_pos);
-            return true;
-        }
-        return false;
+        return is_move_legal(current_state, dir, new_pos);
     }
-    move(current_state, dir, block_pos);
     return true;
 }
 
 
 void attempt_move(State *current_state, direction dir) {
-    is_move_legal(current_state, dir, current_state->player_pos);
+    if (is_move_legal(current_state, dir, current_state->player_pos))
+        move(current_state, dir, current_state->player_pos);
 }

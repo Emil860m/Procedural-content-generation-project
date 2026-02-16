@@ -30,11 +30,8 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
     short y = state->size_y;
     string sstr = string_from_state(state);
     std::unordered_set<std::string> seen_states{sstr};
-    //std::unordered_map<string, directions> game_states = {};
-    groups->reserve(100000);  // or estimated number of states
 
     // groups
-    //groups[0] = {};
     State_group sg;
     std::vector<std::string> connects;
     sg.connected_states = connects;
@@ -130,18 +127,9 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
             default:
                 break;
             }
-            //cout << groups->bucket_count() << endl;
         }
         
     }
-    if (auto search = groups->find("00000020000060606000006064600010656260600050406000"); search != groups->end()) {
-        cout << search->second.child_states.size() <<  "\n" << search->second.size << "\n" << search->second.connections<< "\n";
-    
-    }
-    for (const std::pair<const string, State_group>& n : *groups) {
-        cout << n.first << " " << n.second.size << "\n";
-    }
-    //cout << &groups->begin()->second << endl;
 }
 
 /*
