@@ -4,7 +4,8 @@
 #include <stack>
 #include <cstring>
 #include <vector>
-#include <memory>
+//#include <memory>
+#include <cmath>
 using namespace std;
 struct State_group
 {
@@ -33,11 +34,9 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
     State_group sg;
     std::unordered_set<std::string> connects;
     sg.connected_states = connects;
-    //sg.connections = 0;
     std::unordered_set<std::string> childs;
     childs.insert(sstr);
     sg.child_states = childs;
-    //sg.size = 1;
     string sstr_no_player = remove_player_from_statestring(sstr);
     groups->insert({sstr_no_player, sg});
     
@@ -79,28 +78,23 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
                 if (!found) {
                     // If group does not contain child state we add it
                     sg1->child_states.insert(str);
-                    //sg1->size++;
                 }
                 
                 if (current_no_player.compare(str_no_player) != 0) {
                     // If current and new does not belong to the same group, we add new to currents connections
                     if (!ptr->lost && !ptr->win) {
                         current_sg.connected_states.insert(str_no_player);
-                        //current_sg.connections++;
                     }
                 }
             } else {
                 // Group does not exist
                 State_group sg2;
                 sg2.connected_states = {};
-                //sg2.connections = 0;
                 sg2.child_states = {str};
-                //sg2.size = 1;
                 sg2.can_win = ptr->win;
 
                 if (!ptr->lost && !ptr->win) {
                     current_sg.connected_states.insert(str_no_player);
-                    //current_sg.connections++;
                 }
                 groups->insert({str_no_player, sg2});
             }
@@ -128,9 +122,85 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
         }
         
     }
+
+    
     //merge_circular_dependencies(sstr_no_player, groups);    
 }
 
+
+bool recursive_find_gamestates(std::string state, std::unordered_set<string>* seen_states, std::unordered_map<string, State_group>* groups, short x, short y) {
+    std::string state_no_player = remove_player_from_statestring(state);
+    auto it = groups->find(state_no_player);
+    State_group& current_sg = it->second;
+    for (int i = 0; i < 4; i++){
+        State st = state_from_string(state, x, y);
+        State* ptr = &st;
+        attempt_move(ptr, (direction)i);
+        std::string str = string_from_state(ptr);
+        std::string str_no_player = remove_player_from_statestring(str);
+        if (ptr->win) 
+            current_sg.can_win = true;
+
+            // Check groups
+        if (auto search = groups->find(str_no_player); search != groups->end()) {
+            // Group already exists
+            State_group* sg1 = &search->second;
+            if (sg1->can_win) current_sg.can_win = true;
+            // If group does not contain child state we add it
+            sg1->child_states.insert(str);
+            if (state_no_player.compare(str_no_player) != 0) {
+                // If current and new does not belong to the same group, we add new to currents connections
+                if (!ptr->lost && !ptr->win) {
+                    current_sg.connected_states.insert(str_no_player);
+                }
+            }
+        } else {
+            // Group does not exist
+            State_group sg2;
+            sg2.connected_states = {};
+            sg2.child_states = {str};
+            sg2.can_win = ptr->win;
+
+            if (!ptr->lost && !ptr->win) {
+                current_sg.connected_states.insert(str_no_player);
+            }
+            groups->insert({str_no_player, sg2});
+        }
+        
+        if (!seen_states->count(str) && str != "LOST" && str != "WIN") {
+            seen_states->insert(str);
+            current_sg.can_win = recursive_find_gamestates(str, seen_states, groups, x, y) || current_sg.can_win;
+        }
+        
+    }        
+    return current_sg.can_win;
+}
+
+float evaluate(State* state) {
+    std::string str = string_from_state(state);
+    std::string str_no_player = remove_player_from_statestring(str);
+    State_group sg;
+    sg.child_states.insert(str);
+    std::unordered_set<string> seen_states = {str};
+    std::unordered_map<string, State_group> groups = {{str_no_player, sg}};
+    if (recursive_find_gamestates(str, &seen_states, &groups, state->size_x, state->size_y)) {
+        cout << groups.size() << "\n" << seen_states.size() << "\n";
+        cout << "can be won\n";
+    }
+    else {
+        cout << "Can not be won\n";
+    }
+    for (const auto& n : groups) {
+        //cout << n.first << " " << n.second.can_win << "\n";
+        for (const auto& m : n.second.connected_states) {
+            if (n.first.compare(m) == 0) {
+                cout << "circular:\n" << n.first << "\n" << m << "\n---\n";
+            }
+        }
+    }
+    return sg.eval;
+}
+/*
 void merge_circular_dependencies(std::string start, std::unordered_map<string, State_group>* groups) {
     if (auto search = groups->find(start); search != groups->end()) {
         State_group* sg = &search->second;
@@ -138,6 +208,7 @@ void merge_circular_dependencies(std::string start, std::unordered_map<string, S
             bool circular = false;
             if (auto search2 = groups->find(s); search2 != groups->end()) {
                 State_group* sg_connected = &search2->second;
+                sg->can_win = sg->can_win || sg_connected->can_win;
                 for (string connected : sg_connected->connected_states) {
                     if (s.compare(connected) == 0) {
                         circular = true;
@@ -145,15 +216,17 @@ void merge_circular_dependencies(std::string start, std::unordered_map<string, S
                     }
                 }
                 if (circular) {
-                    
+                    sg->child_states.merge(sg_connected->child_states);
+                    sg->connected_states.merge(sg_connected->connected_states);
+                    groups->insert_or_assign(s, sg);
                 }
             }
         }
     }
-}
+}*/
 
 
-bool group_gamestates(std::string start_group, std::unordered_map<string, State_group>* groups) {
+bool find_entropies(std::string start_group, std::unordered_map<string, State_group>* groups, std::unordered_set<State_group> seen_states) {
     if (start_group == "WIN")
         return true;
     else if (start_group == "LOST")
