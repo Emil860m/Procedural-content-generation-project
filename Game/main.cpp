@@ -7,7 +7,7 @@ int main() {
     string str = "00000020000060606000006064600010656261600050406000";
     State state = state_from_string(str, 5, 5);
     State *ptr = &state;
-    evaluate(ptr);
+    cout << evaluate(ptr) << "\n";
     /*
     //cout << str + "\n";
     std::unordered_map<string, directions> game_states = {};

@@ -141,7 +141,7 @@ bool recursive_find_gamestates(std::string state, std::unordered_set<string>* se
         if (ptr->win) 
             current_sg.can_win = true;
 
-            // Check groups
+        // Check groups
         if (auto search = groups->find(str_no_player); search != groups->end()) {
             // Group already exists
             State_group* sg1 = &search->second;
@@ -176,6 +176,37 @@ bool recursive_find_gamestates(std::string state, std::unordered_set<string>* se
     return current_sg.can_win;
 }
 
+float recursive_find_entropies(std::string str, std::unordered_set<string>* seen_states, std::unordered_map<string, State_group>* groups) {
+    if (str.compare("WIN") == 0) return 0.0f;
+    else if (str.compare("LOST") == 0) return 999.0f;
+    auto it = groups->find(str);
+    State_group& current_sg = it->second;
+    int win_count = 0;
+    float min = 999;
+    std::vector<float> entropies;
+    for (std::string s : current_sg.connected_states) {
+        
+        auto inner = groups->find(s);
+        State_group& inner_sg = inner->second;
+        win_count += inner_sg.can_win;
+        float entropy;
+        if (!seen_states->count(s)) {
+            seen_states->insert(s);
+            entropy = recursive_find_entropies(s, seen_states, groups);
+        }
+        else {
+            entropy = inner_sg.eval;
+        }
+        if (entropy < min) {
+            min = entropy;
+        }
+    }
+    float logval = log2f(current_sg.connected_states.size() - (win_count - 1));
+    cout << logval << "\n";
+    current_sg.eval = log2f(current_sg.connected_states.size() - (win_count - 1)) + min;
+    return current_sg.eval;
+}
+
 float evaluate(State* state) {
     std::string str = string_from_state(state);
     std::string str_no_player = remove_player_from_statestring(str);
@@ -186,18 +217,20 @@ float evaluate(State* state) {
     if (recursive_find_gamestates(str, &seen_states, &groups, state->size_x, state->size_y)) {
         cout << groups.size() << "\n" << seen_states.size() << "\n";
         cout << "can be won\n";
+        std::unordered_set<string> seen_states2 = {str};
+        sg.eval = recursive_find_entropies(str_no_player, &seen_states2, &groups);
     }
     else {
         cout << "Can not be won\n";
     }
     for (const auto& n : groups) {
-        //cout << n.first << " " << n.second.can_win << "\n";
         for (const auto& m : n.second.connected_states) {
             if (n.first.compare(m) == 0) {
                 cout << "circular:\n" << n.first << "\n" << m << "\n---\n";
             }
         }
     }
+    cout << sg.eval << "\n";
     return sg.eval;
 }
 /*
