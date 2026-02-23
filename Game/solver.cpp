@@ -4,15 +4,14 @@
 #include <stack>
 #include <cstring>
 #include <vector>
+#include <memory>
 using namespace std;
 struct State_group
 {
-    std::vector<std::string> child_states;
-    std::vector<std::string> connected_states;
+    std::unordered_set<std::string> child_states;
+    std::unordered_set<std::string> connected_states;
     bool can_win = false;
     float eval = 0.0f;
-    int size = 0;
-    int connections = 0;
 };
 
 struct directions{
@@ -30,16 +29,15 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
     short y = state->size_y;
     string sstr = string_from_state(state);
     std::unordered_set<std::string> seen_states{sstr};
-
     // groups
     State_group sg;
-    std::vector<std::string> connects;
+    std::unordered_set<std::string> connects;
     sg.connected_states = connects;
-    sg.connections = 0;
-    std::vector<std::string> childs;
-    childs.push_back(sstr);
+    //sg.connections = 0;
+    std::unordered_set<std::string> childs;
+    childs.insert(sstr);
     sg.child_states = childs;
-    sg.size = 1;
+    //sg.size = 1;
     string sstr_no_player = remove_player_from_statestring(sstr);
     groups->insert({sstr_no_player, sg});
     
@@ -80,31 +78,31 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
                 }
                 if (!found) {
                     // If group does not contain child state we add it
-                    sg1->child_states.push_back(str);
-                    sg1->size++;
+                    sg1->child_states.insert(str);
+                    //sg1->size++;
                 }
                 
                 if (current_no_player.compare(str_no_player) != 0) {
                     // If current and new does not belong to the same group, we add new to currents connections
                     if (!ptr->lost && !ptr->win) {
-                        current_sg.connected_states.push_back(str_no_player);
-                        current_sg.connections++;
+                        current_sg.connected_states.insert(str_no_player);
+                        //current_sg.connections++;
                     }
                 }
             } else {
                 // Group does not exist
                 State_group sg2;
                 sg2.connected_states = {};
-                sg2.connections = 0;
+                //sg2.connections = 0;
                 sg2.child_states = {str};
-                sg2.size = 1;
+                //sg2.size = 1;
                 sg2.can_win = ptr->win;
 
-                groups->insert({str_no_player, sg2});
                 if (!ptr->lost && !ptr->win) {
-                    current_sg.connected_states.push_back(str_no_player);
-                    current_sg.connections++;
+                    current_sg.connected_states.insert(str_no_player);
+                    //current_sg.connections++;
                 }
+                groups->insert({str_no_player, sg2});
             }
             if (!seen_states.count(str) && str != "LOST" && str != "WIN") {
                 st.push(str);
@@ -130,6 +128,40 @@ void solve(State *state, std::unordered_map<string, directions>* game_states, st
         }
         
     }
+    //merge_circular_dependencies(sstr_no_player, groups);    
+}
+
+void merge_circular_dependencies(std::string start, std::unordered_map<string, State_group>* groups) {
+    if (auto search = groups->find(start); search != groups->end()) {
+        State_group* sg = &search->second;
+        for (string s : sg->connected_states) {
+            bool circular = false;
+            if (auto search2 = groups->find(s); search2 != groups->end()) {
+                State_group* sg_connected = &search2->second;
+                for (string connected : sg_connected->connected_states) {
+                    if (s.compare(connected) == 0) {
+                        circular = true;
+                        break;
+                    }
+                }
+                if (circular) {
+                    
+                }
+            }
+        }
+    }
+}
+
+
+bool group_gamestates(std::string start_group, std::unordered_map<string, State_group>* groups) {
+    if (start_group == "WIN")
+        return true;
+    else if (start_group == "LOST")
+        return false;
+
+    return false;
+
+    
 }
 
 /*

@@ -1,11 +1,12 @@
 #include "state.hpp"
 #include <unordered_set>
+#include <memory>
 using namespace std;
 
 struct State_group
 {
-    std::vector<std::string> child_states;
-    std::vector<std::string> connected_states;
+    std::unordered_set<std::string> child_states;
+    std::unordered_set<std::string> connected_states;
     bool can_win = false;
     float eval = 0.0f;
     int size = 0;

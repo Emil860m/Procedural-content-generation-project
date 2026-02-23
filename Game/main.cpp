@@ -10,6 +10,7 @@ int main() {
     //cout << str + "\n";
     std::unordered_map<string, directions> game_states = {};
     std::unordered_map<string, State_group> groups = {};
+    groups.reserve(10000000);
     solve(ptr, &game_states, &groups);
     
 
@@ -19,7 +20,10 @@ int main() {
     //}
     
     for (const auto& n : groups) {
-        cout << n.first << " " << n.second.size << "\n";
+        cout << n.first << " " << n.second.child_states.size() << "\n";
+        /*for (std::string s : n.second.connected_states) {
+            cout << s << "\n";
+        }*/
     }
     for (const std::pair<const string, directions>& n : game_states) {
         //cout << n.first << " " << n.second.down << "\n";
