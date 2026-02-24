@@ -202,8 +202,7 @@ float recursive_find_entropies(std::string str, std::unordered_set<string>* seen
         }
     }
     float logval = log2f(current_sg.connected_states.size() - (win_count - 1));
-    cout << logval << "\n";
-    current_sg.eval = log2f(current_sg.connected_states.size() - (win_count - 1)) + min;
+    current_sg.eval = logval + min;
     return current_sg.eval;
 }
 
@@ -215,79 +214,20 @@ float evaluate(State* state) {
     std::unordered_set<string> seen_states = {str};
     std::unordered_map<string, State_group> groups = {{str_no_player, sg}};
     if (recursive_find_gamestates(str, &seen_states, &groups, state->size_x, state->size_y)) {
-        cout << groups.size() << "\n" << seen_states.size() << "\n";
-        cout << "can be won\n";
         std::unordered_set<string> seen_states2 = {str};
         sg.eval = recursive_find_entropies(str_no_player, &seen_states2, &groups);
     }
     else {
         cout << "Can not be won\n";
+        return -1.0f;
     }
     for (const auto& n : groups) {
         for (const auto& m : n.second.connected_states) {
             if (n.first.compare(m) == 0) {
+                cout << "WARNING: CIRCULAR DEPENDENCY DETECTED\n";
                 cout << "circular:\n" << n.first << "\n" << m << "\n---\n";
             }
         }
     }
-    cout << sg.eval << "\n";
-    return sg.eval;
+    return std::ceil(sg.eval * 100.0) / 100.0;
 }
-/*
-void merge_circular_dependencies(std::string start, std::unordered_map<string, State_group>* groups) {
-    if (auto search = groups->find(start); search != groups->end()) {
-        State_group* sg = &search->second;
-        for (string s : sg->connected_states) {
-            bool circular = false;
-            if (auto search2 = groups->find(s); search2 != groups->end()) {
-                State_group* sg_connected = &search2->second;
-                sg->can_win = sg->can_win || sg_connected->can_win;
-                for (string connected : sg_connected->connected_states) {
-                    if (s.compare(connected) == 0) {
-                        circular = true;
-                        break;
-                    }
-                }
-                if (circular) {
-                    sg->child_states.merge(sg_connected->child_states);
-                    sg->connected_states.merge(sg_connected->connected_states);
-                    groups->insert_or_assign(s, sg);
-                }
-            }
-        }
-    }
-}*/
-
-
-bool find_entropies(std::string start_group, std::unordered_map<string, State_group>* groups, std::unordered_set<State_group> seen_states) {
-    if (start_group == "WIN")
-        return true;
-    else if (start_group == "LOST")
-        return false;
-
-    return false;
-
-    
-}
-
-/*
-void group_gamestates(std::unordered_map<string, directions>* game_states) {
-    std::unordered_map<string, State_group> groups = {};
-    for (const auto& [key, value] : game_states[0]) {
-        if (auto search = groups.find(key); search != groups.end()) {
-            State_group sg = search->second;
-        } else {
-            State_group sg;
-            std::unordered_set<std::string> child_list;
-            child_list.insert(key);
-            sg.size = 1;
-            sg.child_states = &child_list;
-            groups.insert({key, sg});
-            for(int i = 0; i < 4; i++) {
-                //TODO
-            }
-        }
-    }
-    
-    cout << groups.size();
-}*/

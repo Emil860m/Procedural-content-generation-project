@@ -20,6 +20,3 @@ struct directions{
 };
 
 float evaluate(State* state);
-void solve(State *state, std::unordered_map<string, directions>* game_states, std::unordered_map<string, State_group>* groups);
-
-void group_gamestates(std::unordered_map<string, directions>* game_states);
