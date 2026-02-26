@@ -17,12 +17,12 @@ Evaluated_state generate(short size_x, short size_y, short pop, short iter, shor
     vector<Evaluated_state> population;
     for (int i = 0; i < pop; i++)
     {
-        population.push_back(generate_level());
+        population.push_back(generate_level(size_x, size_y));
     }
     Evaluated_state* best = &population[0];
     best->eval = evaluate(&population[0].state);
     for (Evaluated_state s : population) {
-        s.eval = evaluate(&population[0].state);
+        s.eval = evaluate(&s.state);
         if (best->eval < s.eval) {
             best = &s;
         }
@@ -32,15 +32,26 @@ Evaluated_state generate(short size_x, short size_y, short pop, short iter, shor
         vector<Evaluated_state> next_iter;
         next_iter.push_back(*best);
 
+        for (Evaluated_state es : population) {
+            
+            next_iter.push_back(mutate(es));
+        }
         // for population
             // mutate
             // append mutation to next_iter
         
+        population = next_iter;
+        for (Evaluated_state s : population) {
+            s.eval = evaluate(&s.state);
+            if (best->eval < s.eval) {
+                best = &s;
+            }
+        }
         // population = next_iter
         // evaluate new population and check if new best
 
         // if close enough to or over target, return best
-        
+        if (best->eval > target) return *best;
     }
     //std::sort(population.begin(), population.end(), compareEval);
     return *best;
