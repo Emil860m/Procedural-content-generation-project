@@ -64,6 +64,8 @@ State empty_state(short x, short y) {
             Cell c;
             c.pos.x = i;
             c.pos.y = j;
+            c.block = 0;
+            c.tile = 0;
             inner.push_back(c);
         }
         state.cells.push_back(inner);

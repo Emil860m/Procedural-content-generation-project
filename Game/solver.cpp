@@ -169,7 +169,8 @@ bool recursive_find_gamestates(std::string state, std::unordered_set<string>* se
         
         if (!seen_states->count(str) && str != "LOST" && str != "WIN") {
             seen_states->insert(str);
-            current_sg.can_win = recursive_find_gamestates(str, seen_states, groups, x, y) || current_sg.can_win;
+            bool win = recursive_find_gamestates(str, seen_states, groups, x, y);
+            current_sg.can_win = win || current_sg.can_win;
         }
         
     }        
